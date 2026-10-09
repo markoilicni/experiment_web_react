@@ -3,7 +3,7 @@ import Button from '@mui/material/Button'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import { useState } from 'react'
-import { Outlet, useNavigate } from 'react-router'
+import { Link, Outlet, useNavigate } from 'react-router'
 import { logoutRequest } from '@/features/auth/auth-api'
 import { useSessionStore } from '@/features/auth/session-store'
 
@@ -30,12 +30,17 @@ export function AppShell() {
           <Typography variant="h6" component="span">
             Experiment
           </Typography>
-          <Button color="inherit" onClick={() => void onLogout()} disabled={pending}>
-            Log out
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button component={Link} to="/dev/data-view" color="inherit">
+              Data view
+            </Button>
+            <Button color="inherit" onClick={() => void onLogout()} disabled={pending}>
+              Log out
+            </Button>
+          </div>
         </Toolbar>
       </AppBar>
-      <main className="mx-auto max-w-3xl px-4 py-8">
+      <main className="mx-auto max-w-5xl px-4 py-8">
         <Outlet />
       </main>
     </div>
