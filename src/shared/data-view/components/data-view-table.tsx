@@ -13,6 +13,7 @@ function gridTemplate(
   showExpand: boolean,
   showActions: boolean,
 ) {
+  // CSS lengths, not Tailwind: the column count is only known at runtime.
   return [
     showExpand ? '2.75rem' : null,
     `repeat(${columnCount}, minmax(0, 1fr))`,
