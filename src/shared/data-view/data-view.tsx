@@ -1,8 +1,7 @@
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
-import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore'
 import {
+  createExpandedRowModel,
   createSortedRowModel,
+  rowExpandingFeature,
   rowSortingFeature,
   sortFn_alphanumeric,
   tableFeatures,
@@ -11,11 +10,21 @@ import {
   type SortingState,
 } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
+import { CreateEntry } from '@/shared/data-view/components/create-entry'
+import { DataViewCards } from '@/shared/data-view/components/data-view-cards'
+import { DataViewTable } from '@/shared/data-view/components/data-view-table'
+import { SortChips } from '@/shared/data-view/components/sort-chips'
+import type {
+  ViewHeader,
+  ViewRow,
+} from '@/shared/data-view/components/view-model'
 import type { DataViewProps, DataViewSort } from '@/shared/data-view/types'
 
 const features = tableFeatures({
   rowSortingFeature,
   sortedRowModel: createSortedRowModel(),
+  rowExpandingFeature,
+  expandedRowModel: createExpandedRowModel(),
   sortFns: { alphanumeric: sortFn_alphanumeric },
 })
 
@@ -37,38 +46,24 @@ function toDataViewSort(sorting: SortingState): DataViewSort | null {
   }
 }
 
-function sortDirectionLabel(sort: false | 'asc' | 'desc') {
-  if (sort === 'asc') {
-    return 'ascending'
-  }
-  if (sort === 'desc') {
-    return 'descending'
-  }
-  return 'not sorted'
-}
-
-function SortIcon({ sort }: { sort: false | 'asc' | 'desc' }) {
-  if (sort === 'asc') {
-    return <ArrowUpwardIcon fontSize="small" aria-hidden />
-  }
-  if (sort === 'desc') {
-    return <ArrowDownwardIcon fontSize="small" aria-hidden />
-  }
-  return <UnfoldMoreIcon fontSize="small" aria-hidden />
-}
-
 export function DataView<T extends Record<string, unknown>>({
   columns,
   data,
   getRowId,
+  getRowLabel,
   sortingMode,
   sorting,
   onSortingChange,
+  expansion = { mode: 'off' },
+  actions,
+  create,
 }: DataViewProps<T>) {
   const [internalSorting, setInternalSorting] = useState<DataViewSort | null>(
     null,
   )
   const activeSorting = sorting === undefined ? internalSorting : sorting
+  const showExpand = expansion.mode !== 'off'
+  const showActions = actions !== undefined
 
   const columnDefs = useMemo<ColumnDef<typeof features, T>[]>(
     () =>
@@ -90,6 +85,24 @@ export function DataView<T extends Record<string, unknown>>({
       data,
       columns: columnDefs,
       getRowId: (row) => getRowId(row),
+      getSubRows:
+        expansion.mode === 'subrows'
+          ? (row) => expansion.getSubRows(row)
+          : undefined,
+      getRowCanExpand: (row) => {
+        if (expansion.mode === 'subrows') {
+          return (
+            row.depth === 0 &&
+            (expansion.getSubRows(row.original)?.length ?? 0) > 0
+          )
+        }
+        if (expansion.mode === 'detail') {
+          return expansion.canExpand?.(row.original) ?? true
+        }
+        return false
+      },
+      enableExpanding: showExpand,
+      autoResetExpanded: false,
       manualSorting: sortingMode === 'server',
       enableMultiSort: false,
       enableSortingRemoval: true,
@@ -106,122 +119,47 @@ export function DataView<T extends Record<string, unknown>>({
         onSortingChange?.(mapped)
       },
     },
-    (state) => ({ sorting: state.sorting }),
+    (state) => ({ sorting: state.sorting, expanded: state.expanded }),
   )
 
   const headerGroup = table.getHeaderGroups()[0]
-  const rows = table.getRowModel().rows
-  const template = `repeat(${columns.length}, minmax(0, 1fr))`
+  const headers: ViewHeader[] = (headerGroup?.headers ?? []).map((header) => ({
+    id: header.id,
+    columnId: header.column.id,
+    canSort: header.column.getCanSort(),
+    sorted: header.column.getIsSorted(),
+    toggle: () => header.column.toggleSorting(),
+  }))
+  const rows: ViewRow<T>[] = table.getRowModel().rows.map((row) => ({
+    id: row.id,
+    depth: row.depth,
+    original: row.original,
+    canExpand: row.getCanExpand(),
+    expanded: row.getIsExpanded(),
+    toggleExpanded: () => row.toggleExpanded(),
+  }))
+
+  function rowLabel(row: T) {
+    return getRowLabel?.(row) ?? 'row'
+  }
+
+  const body = {
+    columns,
+    headers,
+    rows,
+    expansion,
+    actions,
+    showExpand,
+    showActions,
+    rowLabel,
+  }
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap gap-2 md:hidden">
-        {headerGroup?.headers.map((header) => {
-          const column = columns.find((item) => item.id === header.column.id)
-          if (!column?.sortable || !header.column.getCanSort()) {
-            return null
-          }
-          return (
-            <SortButton
-              key={header.id}
-              label={column.header}
-              sort={header.column.getIsSorted()}
-              onToggle={() => header.column.toggleSorting()}
-            />
-          )
-        })}
-      </div>
-
-      <div className="hidden overflow-hidden rounded-lg bg-white shadow-sm md:block">
-        <div
-          className="grid border-b border-slate-200 bg-slate-100"
-          style={{ gridTemplateColumns: template }}
-        >
-          {headerGroup?.headers.map((header) => {
-            const column = columns.find((item) => item.id === header.column.id)
-            const sorted = header.column.getIsSorted()
-            return (
-              <div
-                key={header.id}
-                className="px-3 py-2 text-left text-sm font-medium text-slate-700"
-                aria-sort={
-                  sorted === 'asc'
-                    ? 'ascending'
-                    : sorted === 'desc'
-                      ? 'descending'
-                      : 'none'
-                }
-              >
-                {column?.sortable && header.column.getCanSort() ? (
-                  <SortButton
-                    label={column.header}
-                    sort={sorted}
-                    onToggle={() => header.column.toggleSorting()}
-                  />
-                ) : (
-                  column?.header
-                )}
-              </div>
-            )
-          })}
-        </div>
-        {rows.map((row) => (
-          <div
-            key={row.id}
-            className="grid border-b border-slate-100 last:border-b-0"
-            style={{ gridTemplateColumns: template }}
-          >
-            {columns.map((column) => (
-              <div key={column.id} className="px-3 py-2 text-sm">
-                {column.cell(row.original)}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-
-      <div className="flex flex-col gap-3 md:hidden">
-        {rows.map((row) => (
-          <article
-            key={row.id}
-            className="rounded-lg bg-white p-4 shadow-sm"
-          >
-            {columns.map((column) => (
-              <div
-                key={column.id}
-                className="flex items-start justify-between gap-4 py-1"
-              >
-                <span className="text-sm text-slate-500">{column.header}</span>
-                <span className="text-right text-sm">
-                  {column.cell(row.original)}
-                </span>
-              </div>
-            ))}
-          </article>
-        ))}
-      </div>
+      <CreateEntry create={create} />
+      <SortChips headers={headers} columns={columns} />
+      <DataViewTable {...body} />
+      <DataViewCards {...body} />
     </div>
-  )
-}
-
-function SortButton({
-  label,
-  sort,
-  onToggle,
-}: {
-  label: string
-  sort: false | 'asc' | 'desc'
-  onToggle: () => void
-}) {
-  return (
-    <button
-      type="button"
-      className="inline-flex items-center gap-1 text-sm font-medium text-slate-800"
-      aria-label={`${label}, ${sortDirectionLabel(sort)}`}
-      onClick={onToggle}
-    >
-      {label}
-      <SortIcon sort={sort} />
-    </button>
   )
 }
