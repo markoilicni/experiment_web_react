@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import type { DataViewColumn } from '@/shared/data-view/types'
 import { DetailPanel } from '@/shared/data-view/components/detail-panel'
 import { ExpandButton } from '@/shared/data-view/components/expand-button'
@@ -13,6 +14,7 @@ function gridTemplate(
   showExpand: boolean,
   showActions: boolean,
 ) {
+  // One grid for the header and every row, so column tracks are shared.
   // CSS lengths, not Tailwind: the column count is only known at runtime.
   return [
     showExpand ? '2.75rem' : null,
@@ -42,19 +44,19 @@ export function DataViewTable<T extends Record<string, unknown>>({
 }: DataViewBodyProps<T>) {
   const template = gridTemplate(columns.length, showExpand, showActions)
 
+  const headerCell =
+    'border-b border-slate-200 bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700'
+
   return (
     <div className="hidden overflow-hidden rounded-lg bg-white shadow-sm md:block">
-      <div
-        className="grid border-b border-slate-200 bg-slate-100"
-        style={{ gridTemplateColumns: template }}
-      >
-        {showExpand ? <div /> : null}
+      <div className="grid" style={{ gridTemplateColumns: template }}>
+        {showExpand ? <div className={headerCell} /> : null}
         {headers.map((header) => {
           const column = columnFor(columns, header)
           return (
             <div
               key={header.id}
-              className="px-3 py-2 text-left text-sm font-medium text-slate-700"
+              className={`${headerCell} text-left`}
               aria-sort={
                 header.sorted === 'asc'
                   ? 'ascending'
@@ -76,19 +78,14 @@ export function DataViewTable<T extends Record<string, unknown>>({
           )
         })}
         {showActions ? (
-          <div className="px-3 py-2 text-right text-sm font-medium text-slate-700">
-            Actions
-          </div>
+          <div className={`${headerCell} text-right`}>Actions</div>
         ) : null}
-      </div>
-      {rows.map((row) => (
-        <div key={row.id} className="border-b border-slate-100 last:border-b-0">
-          <div
-            className={row.depth > 0 ? 'grid bg-slate-50' : 'grid'}
-            style={{ gridTemplateColumns: template }}
-          >
+        {rows.map((row) => (
+          <Fragment key={row.id}>
             {showExpand ? (
-              <div className="flex items-center justify-center">
+              <div
+                className={`flex items-center justify-center border-b border-slate-100 ${row.depth > 0 ? 'bg-slate-50' : ''}`}
+              >
                 {row.canExpand ? (
                   <ExpandButton
                     expanded={row.expanded}
@@ -101,7 +98,7 @@ export function DataViewTable<T extends Record<string, unknown>>({
             {columns.map((column, index) => (
               <div
                 key={column.id}
-                className="px-3 py-2 text-sm"
+                className={`border-b border-slate-100 px-3 py-2 text-sm ${row.depth > 0 ? 'bg-slate-50' : ''}`}
                 style={
                   index === 0 && row.depth > 0
                     ? { paddingLeft: 12 + row.depth * 16 }
@@ -112,14 +109,20 @@ export function DataViewTable<T extends Record<string, unknown>>({
               </div>
             ))}
             {showActions ? (
-              <div className="px-2 py-1">
+              <div
+                className={`border-b border-slate-100 px-2 py-1 ${row.depth > 0 ? 'bg-slate-50' : ''}`}
+              >
                 <RowActions actions={actions} row={row.original} />
               </div>
             ) : null}
-          </div>
-          <DetailPanel expansion={expansion} row={row} />
-        </div>
-      ))}
+            {expansion.mode === 'detail' && row.expanded ? (
+              <div style={{ gridColumn: '1 / -1' }}>
+                <DetailPanel expansion={expansion} row={row} />
+              </div>
+            ) : null}
+          </Fragment>
+        ))}
+      </div>
     </div>
   )
 }
