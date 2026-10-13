@@ -1,3 +1,6 @@
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
+import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore'
 import {
   createSortedRowModel,
   rowSortingFeature,
@@ -34,14 +37,24 @@ function toDataViewSort(sorting: SortingState): DataViewSort | null {
   }
 }
 
-function sortLabel(sort: false | 'asc' | 'desc') {
+function sortDirectionLabel(sort: false | 'asc' | 'desc') {
   if (sort === 'asc') {
-    return 'ASC'
+    return 'ascending'
   }
   if (sort === 'desc') {
-    return 'DESC'
+    return 'descending'
   }
-  return null
+  return 'not sorted'
+}
+
+function SortIcon({ sort }: { sort: false | 'asc' | 'desc' }) {
+  if (sort === 'asc') {
+    return <ArrowUpwardIcon fontSize="small" aria-hidden />
+  }
+  if (sort === 'desc') {
+    return <ArrowDownwardIcon fontSize="small" aria-hidden />
+  }
+  return <UnfoldMoreIcon fontSize="small" aria-hidden />
 }
 
 export function DataView<T extends Record<string, unknown>>({
@@ -200,15 +213,15 @@ function SortButton({
   sort: false | 'asc' | 'desc'
   onToggle: () => void
 }) {
-  const direction = sortLabel(sort)
   return (
     <button
       type="button"
       className="inline-flex items-center gap-1 text-sm font-medium text-slate-800"
+      aria-label={`${label}, ${sortDirectionLabel(sort)}`}
       onClick={onToggle}
     >
       {label}
-      {direction ? <span aria-hidden="true">{direction}</span> : null}
+      <SortIcon sort={sort} />
     </button>
   )
 }
