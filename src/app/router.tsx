@@ -3,6 +3,7 @@ import { AppShell } from '@/app/app-shell'
 import { AuthLayout } from '@/app/auth-layout'
 import { GuestOnly, RequireAuth } from '@/app/route-guards'
 import { DataViewPage } from '@/pages/data-view-page'
+import { DatePickerPage } from '@/pages/date-picker-page'
 import { DropdownPage } from '@/pages/dropdown-page'
 import { HomePage } from '@/pages/home-page'
 import { LoginPage } from '@/pages/login-page'
@@ -26,6 +27,7 @@ export const router = createBrowserRouter([
           { path: '/', element: <HomePage /> },
           { path: '/dev/data-view', element: <DataViewPage /> },
           { path: '/dev/dropdown', element: <DropdownPage /> },
+          { path: '/dev/date-picker', element: <DatePickerPage /> },
         ],
       },
     ],

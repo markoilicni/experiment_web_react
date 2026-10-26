@@ -37,6 +37,9 @@ export function AppShell() {
             <Button component={Link} to="/dev/dropdown" color="inherit">
               Dropdown
             </Button>
+            <Button component={Link} to="/dev/date-picker" color="inherit">
+              Date picker
+            </Button>
             <Button
               color="inherit"
               onClick={() => void onLogout()}
