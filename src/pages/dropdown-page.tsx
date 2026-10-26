@@ -1,5 +1,5 @@
 import Typography from '@mui/material/Typography'
-import { useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import { Dropdown } from '@/shared/dropdown'
 
 type StatusOption = {
@@ -75,15 +75,29 @@ const sampleUsers: User[] = [
 ]
 
 let loadCallCount = 0
+const loadCountListeners = new Set<(count: number) => void>()
 
 function loadUsers(): Promise<User[]> {
   loadCallCount += 1
-  console.log(`[Dropdown Demo] loadUsers called (call #${loadCallCount})`)
+  for (const listener of loadCountListeners) {
+    listener(loadCallCount)
+  }
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(sampleUsers)
     }, 800)
   })
+}
+
+function useLoadCallCount() {
+  const [count, setCount] = useState(loadCallCount)
+  useLayoutEffect(() => {
+    loadCountListeners.add(setCount)
+    return () => {
+      loadCountListeners.delete(setCount)
+    }
+  }, [])
+  return count
 }
 
 function loadUsersWithError(): Promise<User[]> {
@@ -111,6 +125,8 @@ export function DropdownPage() {
   const [multiUser, setMultiUser] = useState<readonly number[]>([])
 
   const [errorDemoValue, setErrorDemoValue] = useState<number | null>(null)
+  const [department, setDepartment] = useState<string | null>(null)
+  const loadCalls = useLoadCallCount()
 
   return (
     <div className="flex flex-col gap-8">
@@ -164,7 +180,7 @@ export function DropdownPage() {
           />
         </div>
         <Typography variant="body2" component="p">
-          <strong>Selected values:</strong> {formatValue(multiUser.length > 0 ? multiStatus : multiStatus)}
+          <strong>Selected values:</strong> {formatValue(multiStatus)}
         </Typography>
       </section>
 
@@ -175,7 +191,7 @@ export function DropdownPage() {
         <Typography variant="body2" color="text.secondary">
           Value is a numeric id. Label is composed from firstName, lastName, and
           department. Options are loaded once; typing filters locally without
-          re-calling the API. Check the console to verify only one load request.
+          re-calling the API. The load count below stays the same while typing.
         </Typography>
         <div className="max-w-md">
           <Dropdown
@@ -193,6 +209,9 @@ export function DropdownPage() {
         </div>
         <Typography variant="body2" component="p">
           <strong>Selected value:</strong> {formatValue(singleUser)}
+        </Typography>
+        <Typography variant="body2" component="p">
+          <strong>loadOptions calls:</strong> {loadCalls}
         </Typography>
       </section>
 
@@ -261,10 +280,13 @@ export function DropdownPage() {
             label="Department"
             placeholder="Select a department"
             getValue={(opt) => opt}
-            value={null}
-            onChange={() => {}}
+            value={department}
+            onChange={setDepartment}
           />
         </div>
+        <Typography variant="body2" component="p">
+          <strong>Selected value:</strong> {formatValue(department)}
+        </Typography>
       </section>
     </div>
   )

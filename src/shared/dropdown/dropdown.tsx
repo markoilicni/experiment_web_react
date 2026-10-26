@@ -1,4 +1,6 @@
-import Autocomplete from '@mui/material/Autocomplete'
+import Autocomplete, {
+  type AutocompleteRenderInputParams,
+} from '@mui/material/Autocomplete'
 import CircularProgress from '@mui/material/CircularProgress'
 import TextField from '@mui/material/TextField'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -103,6 +105,32 @@ export function Dropdown<T, V extends string | number>(
   const isLoading = loadState.status === 'loading'
   const loadError = loadState.status === 'error' ? loadState.message : null
 
+  function renderInput(params: AutocompleteRenderInputParams) {
+    return (
+      <TextField
+        {...params}
+        label={label}
+        placeholder={placeholder}
+        error={error || Boolean(loadError)}
+        helperText={loadError ?? helperText}
+        slotProps={{
+          ...params.slotProps,
+          input: {
+            ...params.slotProps.input,
+            endAdornment: (
+              <>
+                {isLoading ? (
+                  <CircularProgress color="inherit" size={20} />
+                ) : null}
+                {params.slotProps.input.endAdornment}
+              </>
+            ),
+          },
+        }}
+      />
+    )
+  }
+
   if (multiple) {
     const multiValue = (selectedOptions ?? []) as T[]
     return (
@@ -122,28 +150,7 @@ export function Dropdown<T, V extends string | number>(
         filterOptions={filterOptions}
         disabled={disabled || isLoading}
         loading={isLoading}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            label={label}
-            placeholder={placeholder}
-            error={error || Boolean(loadError)}
-            helperText={loadError ?? helperText}
-            slotProps={{
-              input: {
-                ...params.InputProps,
-                endAdornment: (
-                  <>
-                    {isLoading ? (
-                      <CircularProgress color="inherit" size={20} />
-                    ) : null}
-                    {params.InputProps.endAdornment}
-                  </>
-                ),
-              },
-            }}
-          />
-        )}
+        renderInput={renderInput}
       />
     )
   }
@@ -163,28 +170,7 @@ export function Dropdown<T, V extends string | number>(
       filterOptions={filterOptions}
       disabled={disabled || isLoading}
       loading={isLoading}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={label}
-          placeholder={placeholder}
-          error={error || Boolean(loadError)}
-          helperText={loadError ?? helperText}
-          slotProps={{
-            input: {
-              ...params.InputProps,
-              endAdornment: (
-                <>
-                  {isLoading ? (
-                    <CircularProgress color="inherit" size={20} />
-                  ) : null}
-                  {params.InputProps.endAdornment}
-                </>
-              ),
-            },
-          }}
-        />
-      )}
+      renderInput={renderInput}
     />
   )
 }
