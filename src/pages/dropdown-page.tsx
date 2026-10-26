@@ -190,8 +190,10 @@ export function DropdownPage() {
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Value is a numeric id. Label is composed from firstName, lastName, and
-          department. Options are loaded once; typing filters locally without
-          re-calling the API. The load count below stays the same while typing.
+          department. Options are loaded once; typing filters that list locally
+          and does not call loadOptions again. The count includes both user
+          dropdowns. In development, React Strict Mode runs each loader twice on
+          mount.
         </Typography>
         <div className="max-w-md">
           <Dropdown
