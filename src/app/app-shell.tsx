@@ -34,7 +34,14 @@ export function AppShell() {
             <Button component={Link} to="/dev/data-view" color="inherit">
               Data view
             </Button>
-            <Button color="inherit" onClick={() => void onLogout()} disabled={pending}>
+            <Button component={Link} to="/dev/dropdown" color="inherit">
+              Dropdown
+            </Button>
+            <Button
+              color="inherit"
+              onClick={() => void onLogout()}
+              disabled={pending}
+            >
               Log out
             </Button>
           </div>
