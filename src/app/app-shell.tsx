@@ -26,11 +26,13 @@ export function AppShell() {
   return (
     <div className="min-h-screen bg-slate-50">
       <AppBar position="static" color="default" elevation={0}>
-        <Toolbar sx={{ justifyContent: 'space-between' }}>
+        <Toolbar
+          sx={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}
+        >
           <Typography variant="h6" component="span">
             Experiment
           </Typography>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button component={Link} to="/dev/data-view" color="inherit">
               Data view
             </Button>

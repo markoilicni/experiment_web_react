@@ -64,7 +64,7 @@ function IsoDateField({
         }
         onChange(next.format(ISO_DATE))
       }}
-      sx={{ width: '100%' }}
+      sx={{ width: '100%', minWidth: 0 }}
       slotProps={{
         field: { clearable: true },
         textField: {
