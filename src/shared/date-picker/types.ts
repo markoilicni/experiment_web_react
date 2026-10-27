@@ -4,24 +4,19 @@ export type IsoDate = string
 /** `[fromDate, toDate]`. Either element may be empty. */
 export type DateRangeValue = [IsoDate | null, IsoDate | null]
 
-type DatePickerBaseProps = {
+type DateFieldProps = {
   disabled?: boolean
   error?: boolean
   helperText?: string
+  label?: string
 }
 
-export type SingleDatePickerProps = DatePickerBaseProps & {
-  range?: false
-  label?: string
+export type DatePickerProps = DateFieldProps & {
   value: IsoDate | null
   onChange: (value: IsoDate | null) => void
 }
 
-export type DateRangePickerProps = DatePickerBaseProps & {
-  range: true
-  label?: string
+export type DateRangeProps = DateFieldProps & {
   value: DateRangeValue
   onChange: (value: DateRangeValue) => void
 }
-
-export type DatePickerProps = SingleDatePickerProps | DateRangePickerProps
