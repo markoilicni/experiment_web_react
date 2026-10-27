@@ -8,13 +8,12 @@ function formatDate(value: string | null) {
 }
 
 function formatRange(value: DateRangeValue) {
-  const [fromDate, toDate] = value
-  return `[${formatDate(fromDate)}, ${formatDate(toDate)}]`
+  return `from=${formatDate(value.from)} to=${formatDate(value.to)}`
 }
 
 export function DatePickerPage() {
   const [singleDate, setSingleDate] = useState<string | null>(null)
-  const [range, setRange] = useState<DateRangeValue>([null, null])
+  const [range, setRange] = useState<DateRangeValue>({ from: null, to: null })
   const [requiredDate, setRequiredDate] = useState<string | null>(null)
   const requiredMissing = requiredDate === null
 
@@ -49,11 +48,10 @@ export function DatePickerPage() {
           Date range
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          One control. The value is [fromDate, toDate]. Either date can be
-          empty. When both are set, the start is an earlier day than the end.
-          Clearing one bound leaves the other.
+          Stores a from and to date. Either side can be empty. Clearing a field
+          removes only that bound.
         </Typography>
-        <div className="max-w-md">
+        <div className="max-w-xl">
           <DatePicker range label="Created" value={range} onChange={setRange} />
         </div>
         <Typography variant="body2" component="p">

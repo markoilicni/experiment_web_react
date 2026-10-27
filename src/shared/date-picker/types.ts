@@ -1,8 +1,10 @@
 /** Calendar date stored as `YYYY-MM-DD`. Empty is `null`. */
 export type IsoDate = string
 
-/** `[fromDate, toDate]`. Either element may be empty. */
-export type DateRangeValue = [IsoDate | null, IsoDate | null]
+export type DateRangeValue = {
+  from: IsoDate | null
+  to: IsoDate | null
+}
 
 type DatePickerBaseProps = {
   disabled?: boolean
@@ -20,6 +22,8 @@ export type SingleDatePickerProps = DatePickerBaseProps & {
 export type DateRangePickerProps = DatePickerBaseProps & {
   range: true
   label?: string
+  fromLabel?: string
+  toLabel?: string
   value: DateRangeValue
   onChange: (value: DateRangeValue) => void
 }
