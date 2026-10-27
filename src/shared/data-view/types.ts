@@ -67,7 +67,58 @@ export type DataViewCreate = {
   renderForm: (controls: { onClose: () => void }) => ReactNode
 }
 
-export type DataViewProps<T extends RowData> = {
+/** Client filters the loaded rows. Server reports values and leaves the rows as loaded. */
+export type FilteringMode = 'client' | 'server'
+
+/**
+ * Non-empty filter values, keyed by filter id.
+ * A missing key means that filter is clear. Values stay strings so a screen can
+ * send them as query parameters such as `role` and `managerId`.
+ */
+export type DataViewFilterState = Readonly<Record<string, string>>
+
+/** Shared identity for every toolbar filter. `id` is the key used in `DataViewFilterState`. */
+type DataViewFilterBase<T> = {
+  id: string
+  label: string
+  getValue: (row: T) => string
+}
+
+/** Free-text filter. Client mode matches a case-insensitive substring. */
+export type DataViewTextFilter<T> = DataViewFilterBase<T> & {
+  kind: 'text'
+}
+
+/**
+ * Dropdown filter whose options are a fixed list.
+ * The same list is used in client and server mode. Client mode matches the key exactly.
+ * An empty selection matches every row.
+ */
+export type DataViewStaticDropdownFilter<T> = DataViewFilterBase<T> & {
+  kind: 'static'
+  options: readonly unknown[]
+  getOptionValue: (option: unknown) => string
+  getOptionLabel?: (option: unknown) => string
+}
+
+/**
+ * Dropdown filter whose options come from the screen's `loadOptions`.
+ * The shared dropdown loads that list once. Client mode matches the chosen key exactly.
+ */
+export type DataViewLoadedDropdownFilter<T> = DataViewFilterBase<T> & {
+  kind: 'loaded'
+  loadOptions: () => Promise<readonly unknown[]>
+  getOptionValue: (option: unknown) => string
+  getOptionLabel?: (option: unknown) => string
+}
+
+/** One configured filter. Dropdown option types are kept by the field builders. */
+export type DataViewFilter<T> =
+  | DataViewTextFilter<T>
+  | DataViewStaticDropdownFilter<T>
+  | DataViewLoadedDropdownFilter<T>
+
+type DataViewCoreProps<T extends RowData> = {
   columns: DataViewColumn<T>[]
   data: readonly T[]
   getRowId: (row: T) => string
@@ -94,3 +145,20 @@ export type DataViewProps<T extends RowData> = {
   actions?: DataViewActions<T>
   create?: DataViewCreate
 }
+
+/** Filters are optional. When the toolbar is present, the mode is required. */
+export type DataViewProps<T extends RowData> = DataViewCoreProps<T> &
+  (
+    | {
+        filterFields: readonly DataViewFilter<T>[]
+        filteringMode: FilteringMode
+        filters?: DataViewFilterState
+        onFiltersChange?: (filters: DataViewFilterState) => void
+      }
+    | {
+        filterFields?: undefined
+        filteringMode?: undefined
+        filters?: undefined
+        onFiltersChange?: undefined
+      }
+  )
