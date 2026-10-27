@@ -16,6 +16,7 @@ export type {
   DataViewStaticDropdownFilter,
   DataViewTextFilter,
   FilteringMode,
+  PaginationMode,
   SortOrder,
   SortingMode,
 } from '@/shared/data-view/types'

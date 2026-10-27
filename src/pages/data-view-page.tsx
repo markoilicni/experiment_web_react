@@ -19,6 +19,7 @@ import type {
   DataViewFilterState,
   DataViewSort,
   FilteringMode,
+  PaginationMode,
   SortingMode,
 } from '@/shared/data-view'
 
@@ -26,16 +27,23 @@ type CreatePresentation = 'off' | 'modal' | 'inline'
 type ExpansionChoice = DataViewExpansion<SampleRow>['mode']
 
 /**
- * Demo route for the shared data view.
+ * Showcase for the shared data view: sorting, filters, paging, expansion, actions, and create.
  * The filter toolbar has a name field, a role list, and a manager list.
- * Server mode prints the filter values and does not hide rows.
- * @returns The data-view page.
+ * Server filtering prints the filter values and does not hide rows.
+ * Server paging prints the page state and does not slice locally.
+ * @returns The `/dev/data-view` screen.
  */
 export function DataViewPage() {
   // Client sorts the loaded rows. Server only reports the sort.
   const [sortingMode, setSortingMode] = useState<SortingMode>('client')
   // The sort the table is showing, or null when no column is sorted.
   const [sorting, setSorting] = useState<DataViewSort | null>(null)
+  // Whether the view slices locally or only reports page state.
+  const [paginationMode, setPaginationMode] = useState<PaginationMode>('client')
+  // Zero-based page currently shown in the pager.
+  const [page, setPage] = useState(0)
+  // How many top-level sample rows one page holds.
+  const [pageSize, setPageSize] = useState(5)
   // Client hides rows that fail the filters. Server only reports the values.
   const [filteringMode, setFilteringMode] = useState<FilteringMode>('client')
   // Non-empty filter values. Keys match the future users query: `role`, `managerId`.
@@ -50,6 +58,11 @@ export function DataViewPage() {
   const [appearance, setAppearance] = useState<ActionAppearance>('icon')
   // Last row action, announced on the page.
   const [notice, setNotice] = useState('No action yet')
+  // Last page that still has rows after a delete or a larger page size.
+  const lastPage = Math.max(0, Math.ceil(rows.length / pageSize) - 1)
+  if (page > lastPage) {
+    setPage(lastPage)
+  }
 
   // Expansion config for the current toggle. Children and detail read the sample row.
   const expansion: DataViewExpansion<SampleRow> =
@@ -97,6 +110,25 @@ export function DataViewPage() {
             }
           }}
           aria-label="Filtering mode"
+        >
+          <ToggleButton value="client">Client</ToggleButton>
+          <ToggleButton value="server">Server</ToggleButton>
+        </ToggleButtonGroup>
+      </div>
+      <div className="flex flex-col gap-1">
+        <Typography variant="subtitle2" component="h2">
+          Pagination
+        </Typography>
+        <ToggleButtonGroup
+          exclusive
+          size="small"
+          value={paginationMode}
+          onChange={(_event, value: PaginationMode | null) => {
+            if (value) {
+              setPaginationMode(value)
+            }
+          }}
+          aria-label="Pagination mode"
         >
           <ToggleButton value="client">Client</ToggleButton>
           <ToggleButton value="server">Server</ToggleButton>
@@ -155,6 +187,11 @@ export function DataViewPage() {
       {filteringMode === 'server' ? (
         <Typography component="p">{formatSampleFilters(filters)}</Typography>
       ) : null}
+      {paginationMode === 'server' ? (
+        <Typography component="p">
+          page={page} pageSize={pageSize} totalCount={rows.length}
+        </Typography>
+      ) : null}
       <Typography component="p" aria-live="polite">
         {notice}
       </Typography>
@@ -167,6 +204,12 @@ export function DataViewPage() {
         sortingMode={sortingMode}
         sorting={sorting}
         onSortingChange={setSorting}
+        paginationMode={paginationMode}
+        page={page}
+        pageSize={pageSize}
+        totalCount={paginationMode === 'server' ? rows.length : undefined}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
         filteringMode={filteringMode}
         filterFields={sampleFilterFields}
         filters={filters}
