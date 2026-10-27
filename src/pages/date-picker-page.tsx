@@ -1,6 +1,6 @@
 import Typography from '@mui/material/Typography'
 import { useState } from 'react'
-import { DatePicker } from '@/shared/date-picker'
+import { DatePicker, DateRange } from '@/shared/date-picker'
 import type { DateRangeValue } from '@/shared/date-picker'
 
 function formatDate(value: string | null) {
@@ -49,12 +49,12 @@ export function DatePickerPage() {
           Date range
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          One control. The value is [fromDate, toDate]. Either date can be
-          empty. When both are set, the start is an earlier day than the end.
-          Clearing one bound leaves the other.
+          DateRange is its own component. The value is [fromDate, toDate].
+          Either date can be empty. When both are set, the start is an earlier
+          day than the end. Clearing one bound leaves the other.
         </Typography>
         <div className="max-w-md">
-          <DatePicker range label="Created" value={range} onChange={setRange} />
+          <DateRange label="Created" value={range} onChange={setRange} />
         </div>
         <Typography variant="body2" component="p">
           <strong>Selected value:</strong> {formatRange(range)}
