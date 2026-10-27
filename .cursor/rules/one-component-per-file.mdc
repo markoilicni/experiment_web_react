@@ -1,0 +1,23 @@
+---
+description: Put each component in its own small file, and group a feature in a subfolder
+alwaysApply: true
+---
+
+# One component per file
+
+Each React component lives in its own file. A feature made of several components lives in a subfolder named after that feature. Keep every file small: one component, plus only the helpers that exist for that component. When a file holds a second component, or is too long to read in one pass, split it.
+
+```text
+# Bad — DatePicker, DateRange, and RangeDay share one file
+src/shared/date-picker/date-picker.tsx
+
+# Good — date-range pieces sit together, one component per file
+src/shared/date-picker/date-picker.tsx
+src/shared/date-picker/date-range/date-range.tsx
+src/shared/date-picker/date-range/range-day.tsx
+src/shared/date-picker/date-range/date-token.tsx
+src/shared/date-picker/iso-date.ts
+src/shared/date-picker/index.ts
+```
+
+Re-export the public components from the feature `index.ts`. Call sites import from that barrel, not from a file deep in the subfolder.
