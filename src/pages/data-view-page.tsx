@@ -11,6 +11,7 @@ import type {
   DataViewColumn,
   DataViewExpansion,
   DataViewSort,
+  PaginationMode,
   SortingMode,
 } from '@/shared/data-view/types'
 
@@ -92,6 +93,76 @@ const sampleRows: SampleRow[] = [
     canEdit: true,
     canDelete: true,
   },
+  {
+    id: '6',
+    name: 'Jules',
+    role: 'USER',
+    createdAt: '2026-05-08',
+    note: 'Intern',
+    detail: 'Name: Jules\nStatus: Intern\nStarted: 2026-05-08',
+    canEdit: true,
+    canDelete: true,
+  },
+  {
+    id: '7',
+    name: 'Theo',
+    role: 'MANAGER',
+    createdAt: '2026-04-19',
+    note: 'Planning',
+    detail: 'Name: Theo\nStatus: Planning\nStarted: 2026-04-19',
+    canEdit: true,
+    canDelete: true,
+  },
+  {
+    id: '8',
+    name: 'Priya',
+    role: 'PDP',
+    createdAt: '2026-07-01',
+    note: 'Mentor',
+    detail: 'Name: Priya\nStatus: Mentor\nStarted: 2026-07-01',
+    canEdit: true,
+    canDelete: true,
+  },
+  {
+    id: '9',
+    name: 'Owen',
+    role: 'USER',
+    createdAt: '2025-12-14',
+    note: 'On leave',
+    detail: 'Name: Owen\nStatus: On leave\nStarted: 2025-12-14',
+    canEdit: false,
+    canDelete: true,
+  },
+  {
+    id: '10',
+    name: 'Sage',
+    role: 'USER',
+    createdAt: '2026-08-22',
+    note: 'Contractor',
+    detail: 'Name: Sage\nStatus: Contractor\nStarted: 2026-08-22',
+    canEdit: true,
+    canDelete: true,
+  },
+  {
+    id: '11',
+    name: 'Kai',
+    role: 'SUPER',
+    createdAt: '2025-09-30',
+    note: 'Admin',
+    detail: 'Name: Kai\nStatus: Admin\nStarted: 2025-09-30',
+    canEdit: false,
+    canDelete: false,
+  },
+  {
+    id: '12',
+    name: 'Rita',
+    role: 'USER',
+    createdAt: '2026-09-05',
+    note: 'New hire',
+    detail: 'Name: Rita\nStatus: New hire\nStarted: 2026-09-05',
+    canEdit: true,
+    canDelete: true,
+  },
 ]
 
 const columns: DataViewColumn<SampleRow>[] = [
@@ -131,14 +202,29 @@ function removeRow(rows: SampleRow[], id: string): SampleRow[] {
     )
 }
 
+/**
+ * Showcase for the shared data view: sorting, paging, expansion, actions, and create.
+ * @returns The `/dev/data-view` screen.
+ */
 export function DataViewPage() {
   const [sortingMode, setSortingMode] = useState<SortingMode>('client')
   const [sorting, setSorting] = useState<DataViewSort | null>(null)
+  // Whether the view slices locally or only reports page state.
+  const [paginationMode, setPaginationMode] = useState<PaginationMode>('client')
+  // Zero-based page currently shown in the pager.
+  const [page, setPage] = useState(0)
+  // How many top-level sample rows one page holds.
+  const [pageSize, setPageSize] = useState(5)
   const [rows, setRows] = useState(sampleRows)
   const [expansionMode, setExpansionMode] = useState<ExpansionChoice>('off')
   const [createMode, setCreateMode] = useState<CreatePresentation>('modal')
   const [appearance, setAppearance] = useState<ActionAppearance>('icon')
   const [notice, setNotice] = useState('No action yet')
+  // Last page that still has rows after a delete or a larger page size.
+  const lastPage = Math.max(0, Math.ceil(rows.length / pageSize) - 1)
+  if (page > lastPage) {
+    setPage(lastPage)
+  }
 
   const expansion: DataViewExpansion<SampleRow> =
     expansionMode === 'subrows'
@@ -162,6 +248,23 @@ export function DataViewPage() {
           }
         }}
         aria-label="Sorting mode"
+      >
+        <ToggleButton value="client">Client</ToggleButton>
+        <ToggleButton value="server">Server</ToggleButton>
+      </ToggleButtonGroup>
+      <Typography component="p" variant="body2">
+        Pagination
+      </Typography>
+      <ToggleButtonGroup
+        exclusive
+        size="small"
+        value={paginationMode}
+        onChange={(_event, value: PaginationMode | null) => {
+          if (value) {
+            setPaginationMode(value)
+          }
+        }}
+        aria-label="Pagination mode"
       >
         <ToggleButton value="client">Client</ToggleButton>
         <ToggleButton value="server">Server</ToggleButton>
@@ -216,6 +319,11 @@ export function DataViewPage() {
           {sorting?.sortOrder ?? 'none'}
         </Typography>
       ) : null}
+      {paginationMode === 'server' ? (
+        <Typography component="p">
+          page={page} pageSize={pageSize} totalCount={rows.length}
+        </Typography>
+      ) : null}
       <Typography component="p" aria-live="polite">
         {notice}
       </Typography>
@@ -228,6 +336,12 @@ export function DataViewPage() {
         sortingMode={sortingMode}
         sorting={sorting}
         onSortingChange={setSorting}
+        paginationMode={paginationMode}
+        page={page}
+        pageSize={pageSize}
+        totalCount={rows.length}
+        onPageChange={setPage}
+        onPageSizeChange={setPageSize}
         expansion={expansion}
         actions={{
           appearance,
