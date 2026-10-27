@@ -1,0 +1,28 @@
+---
+description: Comment functions, constants, and variables so a reader knows what each one is for
+alwaysApply: true
+---
+
+# Explain with comments
+
+Every function, constant, and variable gets a comment that says what it is for. Write the comment for a reader who has not seen the code. Explain the role. Do not restate the name.
+
+Use a JSDoc block on functions and on exported constants. Name each parameter and the return value. Use one line comment above a local variable or a private constant.
+
+```tsx
+/** Dayjs format token for a calendar date: `YYYY-MM-DD`. */
+export const ISO_DATE = 'YYYY-MM-DD'
+
+/**
+ * Builds the next range after the user picks `day`.
+ * An empty range starts at `day`. A range with only a start becomes a pair,
+ * ordered so the earlier day is first.
+ * @param current - The range before this pick. Either element may be null.
+ * @param day - The picked day, as `YYYY-MM-DD`.
+ * @returns The range to store after the pick.
+ */
+function nextRange(current: DateRangeValue, day: string): DateRangeValue {
+  // True when this cell is the first day of the highlighted range.
+  const isFrom = range.from?.isSame(day, 'day') ?? false
+}
+```
