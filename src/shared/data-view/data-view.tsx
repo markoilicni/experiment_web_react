@@ -104,7 +104,7 @@ function subRowReader<T extends Record<string, unknown>>(
 /**
  * Shared table/card view. Sorting, filters, and paging sit on the view, not in a row cell.
  * @param props - Columns, rows, sort, filters, page state, expansion, actions, and create.
- * @returns The toolbar, the current page of rows, and the pager.
+ * @returns The create button, then the filter bar, then the rows and the pager.
  */
 export function DataView<T extends Record<string, unknown>>({
   columns,
@@ -325,6 +325,7 @@ export function DataView<T extends Record<string, unknown>>({
 
   return (
     <div className="flex flex-col gap-3">
+      <CreateEntry create={create} />
       {filterFields && filterFields.length > 0 ? (
         <FilterToolbar
           fields={filterFields}
@@ -332,13 +333,12 @@ export function DataView<T extends Record<string, unknown>>({
           onAppliedChange={changeFilters}
         />
       ) : null}
-      <CreateEntry create={create} />
       <SortChips headers={headers} columns={columns} />
+      <DataViewTable {...body} />
+      <DataViewCards {...body} />
       {showNoMatches ? (
         <p className="text-sm text-slate-600">No rows match these filters.</p>
       ) : null}
-      <DataViewTable {...body} />
-      <DataViewCards {...body} />
       <DataViewPagination
         page={safePage}
         pageSize={activePageSize}
