@@ -21,6 +21,59 @@ import {
 } from './range-field-display'
 import { RangeFieldInput } from './range-field-input'
 
+
+/**
+ * 
+ * RangeFieldDisplayContext - use in components that need to read the context
+ * RangeHighlightContext - use in components that need to write the context
+ * RangeFieldInput - use in the input component
+ * DateToken - use in the input component
+ * DateRange - use in the date range component
+ * DateLocalization - use in the date range component
+ * LocalizationProvider - use in the date range component
+ * DateCalendar - use in the date range component
+ * DateCalendarRoot - use in the date range component
+ * 
+ * DateRange
+└─ DateLocalization
+   └─ LocalizationProvider                          MUI, Dayjs adapter
+      ├─ RangeFieldDisplayContext.Provider          your context
+      │  └─ FormControl                             MUI
+      │     ├─ InputLabel                           MUI
+      │     ├─ OutlinedInput                        MUI
+      │     │  ├─ RangeFieldInput                   reads RangeFieldDisplayContext (3 down)
+      │     │  │  └─ span
+      │     │  │     ├─ DateToken
+      │     │  │     │  └─ IconButton               MUI
+      │     │  │     │     └─ ClearIcon             MUI X
+      │     │  │     ├─ span  "–"
+      │     │  │     └─ DateToken
+      │     │  │        └─ IconButton
+      │     │  │           └─ ClearIcon
+      │     │  └─ InputAdornment                    MUI
+      │     │     └─ IconButton                     MUI
+      │     │        └─ CalendarIcon                MUI X
+      │     └─ FormHelperText                       MUI
+      └─ Popover                                    MUI, portals to document.body
+         └─ RangeHighlightContext.Provider          your context
+            └─ DateCalendar                         MUI X
+               └─ DateCalendarRoot
+                  ├─ PickersCalendarHeader          month label and arrows
+                  └─ PickersFadeTransitionGroup
+                     └─ div
+                        └─ DayCalendar
+                           └─ div  role="grid"
+                              ├─ header row         weekday labels
+                              └─ PickersSlideTransition
+                                 └─ div  role="rowgroup"
+                                    └─ div  role="row"     one per week
+                                       └─ WrappedDay       one per day
+                                          └─ RangeDay      reads the context, 11 down
+                                             └─ PickerDay
+                                                └─ ButtonBase
+ */
+
+
 /**
  * A single field that stores a date range as `[fromDate, toDate]`.
  * The first click sets the open bound. The click that completes the pair closes the calendar.

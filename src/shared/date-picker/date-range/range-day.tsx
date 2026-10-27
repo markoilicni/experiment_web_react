@@ -7,8 +7,11 @@ import { RangeHighlightContext } from './range-highlight'
  * @param props - MUI day props, including this cell's date and whether it sits outside the visible month.
  * @returns The day button with range highlighting.
  */
+
+
 export function RangeDay(props: PickerDayProps) {
   // Bounds the open calendar is highlighting. An empty bound is null.
+  // context is used to get the from and to dates to children components
   const range = useContext(RangeHighlightContext)
   // This cell's date, and whether it belongs to a month the calendar is only peeking at.
   const { day, outsideCurrentMonth } = props
