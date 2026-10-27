@@ -5,6 +5,12 @@ import { DateLocalization } from './date-localization'
 import { formatIsoDate, ISO_DATE, parseIsoDate } from './iso-date'
 import type { DatePickerProps } from './types'
 
+/**
+ * One calendar date, stored as `YYYY-MM-DD` or empty.
+ * The field keeps a draft while the user types, and commits a value only when that draft is a real date.
+ * @param props - Label, current value, change handler, and optional disabled, error, and helper text.
+ * @returns The MUI date field wrapped in the Dayjs adapter.
+ */
 export function DatePicker({
   label,
   value,
@@ -13,7 +19,9 @@ export function DatePicker({
   error = false,
   helperText,
 }: DatePickerProps) {
+  // Day shown in the field, including a half-typed date that is not stored yet.
   const [draft, setDraft] = useState<Dayjs | null>(() => parseIsoDate(value))
+  // Last `value` prop seen. When the parent changes it, the draft is replaced.
   const [trackedValue, setTrackedValue] = useState(value)
 
   if (trackedValue !== value) {
