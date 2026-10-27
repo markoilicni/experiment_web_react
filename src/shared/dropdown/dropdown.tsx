@@ -4,6 +4,7 @@ import Autocomplete, {
 import CircularProgress from '@mui/material/CircularProgress'
 import TextField from '@mui/material/TextField'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { controlSizeProps } from '@/shared/control-size'
 import type { DropdownProps } from './types'
 
 type LoadState<T> =
@@ -27,7 +28,12 @@ export function Dropdown<T, V extends string | number>(
     multiple = false,
     value,
     onChange,
+    size = 'medium',
   } = props
+  // MUI size and the padding for a form field or the shorter filter field.
+  const sized = controlSizeProps(size)
+  // Spinner diameter. The short field cannot fit the form-field spinner.
+  const spinnerSize = size === 'small' ? 16 : 20
 
   const loadOptions = mode === 'api' ? props.loadOptions : null
   const frontendOptions = mode === 'frontend' ? props.options : null
@@ -111,6 +117,8 @@ export function Dropdown<T, V extends string | number>(
         {...params}
         label={label}
         placeholder={placeholder}
+        size={sized.size}
+        sx={sized.sx}
         error={error || Boolean(loadError)}
         helperText={loadError ?? helperText}
         slotProps={{
@@ -120,7 +128,7 @@ export function Dropdown<T, V extends string | number>(
             endAdornment: (
               <>
                 {isLoading ? (
-                  <CircularProgress color="inherit" size={20} />
+                  <CircularProgress color="inherit" size={spinnerSize} />
                 ) : null}
                 {params.slotProps.input.endAdornment}
               </>
@@ -136,6 +144,7 @@ export function Dropdown<T, V extends string | number>(
     return (
       <Autocomplete<T, true, false, false>
         multiple
+        size={sized.size}
         options={[...options]}
         value={multiValue}
         onChange={(_event, newValue) => {
@@ -158,6 +167,7 @@ export function Dropdown<T, V extends string | number>(
   const singleValue = selectedOptions as T | null
   return (
     <Autocomplete<T, false, false, false>
+      size={sized.size}
       options={[...options]}
       value={singleValue}
       onChange={(_event, newValue) => {

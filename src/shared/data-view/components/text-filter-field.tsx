@@ -1,4 +1,5 @@
 import TextField from '@mui/material/TextField'
+import { controlSizeProps } from '@/shared/control-size'
 
 type TextFilterFieldProps = {
   id: string
@@ -19,6 +20,9 @@ export function TextFilterField({
   value,
   onChange,
 }: TextFilterFieldProps) {
+  // Shorter than a form field, with less padding on every side.
+  const sized = controlSizeProps('small')
+
   return (
     <TextField
       id={id}
@@ -27,6 +31,8 @@ export function TextFilterField({
       placeholder="Any"
       fullWidth
       autoComplete="off"
+      size={sized.size}
+      sx={sized.sx}
       onChange={(event) => onChange(event.target.value)}
     />
   )

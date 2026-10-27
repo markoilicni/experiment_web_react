@@ -1,4 +1,5 @@
 export { Dropdown } from './dropdown'
+export type { ControlSize } from '@/shared/control-size'
 export type {
   DropdownOption,
   DropdownOptionsConfig,

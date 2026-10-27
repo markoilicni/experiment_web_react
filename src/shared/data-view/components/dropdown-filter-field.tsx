@@ -29,6 +29,7 @@ export function DropdownFilterField<T>({
         loadOptions={filter.loadOptions}
         label={filter.label}
         placeholder="Any"
+        size="small"
         getValue={filter.getOptionValue}
         getLabel={filter.getOptionLabel}
         value={value}
@@ -43,6 +44,7 @@ export function DropdownFilterField<T>({
       options={filter.options}
       label={filter.label}
       placeholder="Any"
+      size="small"
       getValue={filter.getOptionValue}
       getLabel={filter.getOptionLabel}
       value={value}

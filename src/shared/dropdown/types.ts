@@ -1,3 +1,5 @@
+import type { ControlSize } from '@/shared/control-size'
+
 export type DropdownOption<T> = T
 
 export type DropdownOptionsConfig<T> =
@@ -15,6 +17,8 @@ export type DropdownBaseProps<T, V> = {
   disabled?: boolean
   error?: boolean
   helperText?: string
+  /** `medium` matches a form field. `small` is the shorter filter field. */
+  size?: ControlSize
 }
 
 export type DropdownSingleProps<T, V> = DropdownBaseProps<T, V> & {
