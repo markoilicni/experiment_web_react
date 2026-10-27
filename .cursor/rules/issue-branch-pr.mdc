@@ -1,0 +1,26 @@
+---
+description: Every code change needs an issue, a feature branch, and a pull request
+alwaysApply: true
+---
+
+# Issue, branch, and pull request
+
+Every code change in this project follows all three steps. Do not commit straight to `main`. Do not force-push `main`.
+
+1. An issue exists first. If the user did not give an issue number, create one before writing code.
+2. Do the work on a feature branch, for example `feat/16-date-range-tuple`. Never commit the change directly on `main`.
+3. Open a pull request against `main` when the work is ready, and link the issue.
+
+```text
+# Bad
+git checkout main
+git commit -m "feat: add the date range"
+git push origin main
+
+# Good
+# issue #16 already exists
+git checkout -b feat/16-date-range-tuple
+git commit -m "feat: store a date range as an ordered pair"
+git push -u origin HEAD
+gh pr create --base main
+```
