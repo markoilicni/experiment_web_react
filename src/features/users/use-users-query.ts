@@ -46,7 +46,7 @@ export function useUserQuery(id: string, enabled = true) {
  */
 function loadUsersByRole(role: Role): Promise<readonly User[]> {
   return queryClient
-    .fetchQuery({
+    .query({
       queryKey: usersKeys.options(role),
       queryFn: () => listUsersByRole(role),
       staleTime: Infinity,
