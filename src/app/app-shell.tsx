@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { Link, Outlet, useNavigate } from 'react-router'
 import { logoutRequest } from '@/features/auth/auth-api'
 import { useSessionStore } from '@/features/auth/session-store'
+import { queryClient } from '@/shared/api/query-client'
 
 export function AppShell() {
   const navigate = useNavigate()
@@ -20,6 +21,8 @@ export function AppShell() {
       // Discarding the client session is the real logout effect.
     }
     clearSession()
+    // Drop the previous user's lists so the next login does not reuse them.
+    queryClient.clear()
     navigate('/login', { replace: true })
   }
 
