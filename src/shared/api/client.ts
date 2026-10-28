@@ -101,5 +101,11 @@ export async function apiFetch<T>(
     return undefined as T
   }
 
-  return (await response.json()) as T
+  // Delete succeeds with an empty body. Parsing that as JSON throws.
+  const bodyText = await response.text()
+  if (bodyText.length === 0) {
+    return undefined as T
+  }
+
+  return JSON.parse(bodyText) as T
 }

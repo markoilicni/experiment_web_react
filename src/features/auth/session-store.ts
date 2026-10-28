@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { setSessionRefreshedHandler } from '@/shared/api/client'
+import { queryClient } from '@/shared/api/query-client'
 import type { AuthResponse, SessionUser } from '@/shared/auth/types'
 import { clearTokens, saveTokens } from '@/shared/auth/tokens'
 import { setUnauthorizedHandler } from '@/shared/auth/unauthorized'
@@ -32,6 +33,8 @@ export const useSessionStore = create<SessionState>((set) => ({
 }))
 
 setUnauthorizedHandler(() => {
+  // A failed refresh must not leave the previous user's rows in the cache.
+  queryClient.clear()
   useSessionStore.getState().clearSession()
 })
 
