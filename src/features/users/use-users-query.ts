@@ -40,18 +40,21 @@ export function useUserQuery(id: string, enabled = true) {
 
 /**
  * Loads active users of one role through the shared cache.
+ * The cache entry is the user array, so list screens and filter dropdowns share one shape.
  * The list stays fresh until a user write invalidates the users keys.
  * @param role - The role the dropdown is listing.
  * @returns Those users.
  */
 function loadUsersByRole(role: Role): Promise<readonly User[]> {
-  return queryClient
-    .query({
-      queryKey: usersKeys.options(role),
-      queryFn: () => listUsersByRole(role),
-      staleTime: Infinity,
-    })
-    .then((page) => page.data)
+  return queryClient.query({
+    queryKey: usersKeys.options(role),
+    queryFn: async () => {
+      // One page of that role. Only `data` is stored under the options key.
+      const page = await listUsersByRole(role)
+      return page.data
+    },
+    staleTime: Infinity,
+  })
 }
 
 /**

@@ -7,6 +7,7 @@ import { DatePickerPage } from '@/pages/date-picker-page'
 import { DropdownPage } from '@/pages/dropdown-page'
 import { HomePage } from '@/pages/home-page'
 import { LoginPage } from '@/pages/login-page'
+import { UsersPage } from '@/pages/users-page'
 
 export const router = createBrowserRouter([
   {
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
         element: <AppShell />,
         children: [
           { path: '/', element: <HomePage /> },
+          { path: '/users', element: <UsersPage /> },
           { path: '/dev/data-view', element: <DataViewPage /> },
           { path: '/dev/dropdown', element: <DropdownPage /> },
           { path: '/dev/date-picker', element: <DatePickerPage /> },
