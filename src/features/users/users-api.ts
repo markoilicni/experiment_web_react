@@ -220,3 +220,19 @@ export function listUsersByRole(role: Role) {
     active: true,
   })
 }
+
+/**
+ * Loads active PDPs who report to one manager.
+ * A new `USER` may only be assigned a PDP with that same manager.
+ * @param managerId - Manager those PDPs must have.
+ * @returns That page of PDPs.
+ */
+export function listPdpsByManager(managerId: string) {
+  return listUsers({
+    page: 0,
+    pageSize: USERS_OPTIONS_PAGE_SIZE,
+    role: 'PDP',
+    managerId,
+    active: true,
+  })
+}

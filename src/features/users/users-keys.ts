@@ -29,6 +29,16 @@ export const usersKeys = {
   },
 
   /**
+   * Key for PDPs who report to one manager.
+   * The create form lists these when the new user is a `USER`.
+   * @param managerId - Manager those PDPs must have.
+   * @returns The key for that option list.
+   */
+  pdpsForManager(managerId: string) {
+    return [...usersKeys.all, 'pdps-for-manager', managerId] as const
+  },
+
+  /**
    * Key for one user.
    * @param id - User id from the API.
    * @returns The key for that user.
