@@ -31,6 +31,11 @@ export type DropdownMultipleProps<T, V> = DropdownBaseProps<T, V> & {
   multiple: true
   value: DropdownMultipleValue<V>
   onChange: (value: DropdownMultipleValue<V>) => void
+  /**
+   * When true, each selected option in the open list shows a check beside its
+   * label. Off by default; the list keeps only the faint selected background.
+   */
+  showSelectedMarker?: boolean
 }
 
 export type DropdownProps<T, V> = DropdownOptionsConfig<T> &

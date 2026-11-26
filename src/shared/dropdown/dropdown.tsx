@@ -5,6 +5,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import TextField from '@mui/material/TextField'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { controlSizeProps } from '@/shared/control-size'
+import { SelectedMarkerOption } from './selected-marker-option'
 import type { DropdownProps } from './types'
 
 type LoadState<T> =
@@ -140,7 +141,12 @@ export function Dropdown<T, V extends string | number>(
   }
 
   if (multiple) {
+    // Options already in the value. Cast after the multiple branch.
     const multiValue = (selectedOptions ?? []) as T[]
+    // When true, selected rows in the open list show a check beside the label.
+    const showSelectedMarker =
+      props.multiple === true && Boolean(props.showSelectedMarker)
+
     return (
       <Autocomplete<T, true, false, false>
         multiple
@@ -160,6 +166,17 @@ export function Dropdown<T, V extends string | number>(
         disabled={disabled || isLoading}
         loading={isLoading}
         renderInput={renderInput}
+        renderOption={
+          showSelectedMarker
+            ? (liProps, option, state) => (
+                <SelectedMarkerOption
+                  liProps={liProps}
+                  selected={state.selected}
+                  label={resolveLabel(option)}
+                />
+              )
+            : undefined
+        }
       />
     )
   }

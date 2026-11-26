@@ -164,13 +164,28 @@ export function DropdownPage() {
           Frontend list (multiple select)
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Select multiple statuses. Clear individual chips or all at once.
+          Both dropdowns share the same selected keys. Open each list to compare:
+          the first shows a check beside selected options; the second keeps only
+          the faint selected background. Chips in the field stay the same either
+          way.
         </Typography>
-        <div className="max-w-md">
+        <div className="flex flex-col gap-4 max-w-md">
           <Dropdown
             mode="frontend"
             options={statusOptions}
-            label="Statuses"
+            label="Statuses (marker on)"
+            placeholder="Select statuses"
+            getValue={(opt) => opt.code}
+            getLabel={(opt) => opt.display}
+            multiple
+            showSelectedMarker
+            value={multiStatus}
+            onChange={setMultiStatus}
+          />
+          <Dropdown
+            mode="frontend"
+            options={statusOptions}
+            label="Statuses (marker off)"
             placeholder="Select statuses"
             getValue={(opt) => opt.code}
             getLabel={(opt) => opt.display}
