@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { queryClient } from '@/shared/api/query-client'
 import type { Role } from '@/shared/auth/types'
 import {
+  USERS_OPTIONS_PAGE_SIZE,
   getUser,
   listPdpsByManager,
   listUsers,
@@ -93,4 +94,31 @@ export function loadPdpsForManager(
       staleTime: Infinity,
     })
     .then((page) => page.data)
+}
+
+/**
+ * Loads ids in one manager's tree for write-permission checks.
+ * The manager themselves is not included. Matches `managerTreeId` on the list API.
+ * @param managerId - Manager whose descendants may be edited or deactivated.
+ * @returns Those user ids.
+ */
+export function loadManagerTreeMemberIds(
+  managerId: string,
+): Promise<ReadonlySet<string>> {
+  if (!managerId) {
+    return Promise.resolve(new Set())
+  }
+  return queryClient
+    .query({
+      queryKey: usersKeys.managerTree(managerId),
+      queryFn: () =>
+        listUsers({
+          page: 0,
+          pageSize: USERS_OPTIONS_PAGE_SIZE,
+          managerTreeId: managerId,
+          active: true,
+        }),
+      staleTime: Infinity,
+    })
+    .then((page) => new Set(page.data.map((user) => user.id)))
 }
