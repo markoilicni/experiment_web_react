@@ -36,6 +36,9 @@ export function AppShell() {
             Experiment
           </Typography>
           <div className="flex flex-wrap items-center gap-2">
+            <Button component={Link} to="/users" color="inherit">
+              Users
+            </Button>
             <Button component={Link} to="/dev/data-view" color="inherit">
               Data view
             </Button>
