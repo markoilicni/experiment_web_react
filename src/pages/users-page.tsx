@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useSessionStore } from '@/features/auth/session-store'
 import {
+  CreateUserEntry,
   listUsersByRole,
   useUsersQuery,
   usersKeys,
@@ -34,7 +35,8 @@ function toNameMap(users: readonly User[] | undefined): Map<string, string> {
 
 /**
  * Signed-in users list with server filters, sort, and paging.
- * Create, edit, and delete stay off here; view shows basic fields.
+ * `SUPER` and `MANAGER` can create a user. Create stays outside DataView so the
+ * temporary password can block dismiss until it has been read.
  * @returns The `/users` screen.
  */
 export function UsersPage() {
@@ -98,6 +100,7 @@ export function UsersPage() {
       <Typography variant="h4" component="h1">
         Users
       </Typography>
+      <CreateUserEntry />
       {usersQuery.isError ? (
         <Typography component="p" color="error">
           {usersQuery.error instanceof Error

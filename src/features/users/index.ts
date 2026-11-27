@@ -7,6 +7,7 @@ export {
   getTemporaryPassword,
   getUser,
   issueTemporaryPassword,
+  listPdpsByManager,
   listUsers,
   listUsersByRole,
   normalizeUsersListParams,
@@ -32,9 +33,11 @@ export {
 export {
   loadManagerOptions,
   loadPdpOptions,
+  loadPdpsForManager,
   useUserQuery,
   useUsersQuery,
 } from '@/features/users/use-users-query'
+export { CreateUserEntry } from '@/features/users/create-user'
 export {
   useCreateUser,
   useDeactivateUser,

@@ -3,6 +3,7 @@ import { queryClient } from '@/shared/api/query-client'
 import type { Role } from '@/shared/auth/types'
 import {
   getUser,
+  listPdpsByManager,
   listUsers,
   listUsersByRole,
   normalizeUsersListParams,
@@ -71,4 +72,25 @@ export function loadManagerOptions(): Promise<readonly User[]> {
  */
 export function loadPdpOptions(): Promise<readonly User[]> {
   return loadUsersByRole('PDP')
+}
+
+/**
+ * Loads PDPs who share one manager, through the shared cache.
+ * An empty manager id does not call the API.
+ * @param managerId - Manager those PDPs must report to.
+ * @returns Those PDPs.
+ */
+export function loadPdpsForManager(
+  managerId: string,
+): Promise<readonly User[]> {
+  if (!managerId) {
+    return Promise.resolve([])
+  }
+  return queryClient
+    .query({
+      queryKey: usersKeys.pdpsForManager(managerId),
+      queryFn: () => listPdpsByManager(managerId),
+      staleTime: Infinity,
+    })
+    .then((page) => page.data)
 }
