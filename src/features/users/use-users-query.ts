@@ -99,6 +99,9 @@ export function loadPdpsForManager(
 /**
  * Loads ids in one manager's tree for write-permission checks.
  * The manager themselves is not included. Matches `managerTreeId` on the list API.
+ * Callers that cache this should use `usersKeys.managerTree` around this function.
+ * It does not nest a query under that key, so a `useQuery` with the same key can
+ * call it without waiting on itself.
  * @param managerId - Manager whose descendants may be edited or deactivated.
  * @returns Those user ids.
  */
@@ -108,17 +111,10 @@ export function loadManagerTreeMemberIds(
   if (!managerId) {
     return Promise.resolve(new Set())
   }
-  return queryClient
-    .query({
-      queryKey: usersKeys.managerTree(managerId),
-      queryFn: () =>
-        listUsers({
-          page: 0,
-          pageSize: USERS_OPTIONS_PAGE_SIZE,
-          managerTreeId: managerId,
-          active: true,
-        }),
-      staleTime: Infinity,
-    })
-    .then((page) => new Set(page.data.map((user) => user.id)))
+  return listUsers({
+    page: 0,
+    pageSize: USERS_OPTIONS_PAGE_SIZE,
+    managerTreeId: managerId,
+    active: true,
+  }).then((page) => new Set(page.data.map((user) => user.id)))
 }
