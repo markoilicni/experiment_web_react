@@ -32,12 +32,23 @@ export {
 } from '@/features/users/users-types'
 export {
   loadManagerOptions,
+  loadManagerTreeMemberIds,
   loadPdpOptions,
   loadPdpsForManager,
   useUserQuery,
   useUsersQuery,
 } from '@/features/users/use-users-query'
 export { CreateUserEntry } from '@/features/users/create-user'
+export {
+  EditUserDialog,
+  canActivateUser,
+  canDeactivateUser,
+  canDeleteUser,
+  canEditUser,
+} from '@/features/users/edit-user'
+export { DeactivateUserDialog } from '@/features/users/deactivate-user'
+export { ActivateUserDialog } from '@/features/users/activate-user'
+export { DeleteUserDialog } from '@/features/users/delete-user'
 export {
   useCreateUser,
   useDeactivateUser,

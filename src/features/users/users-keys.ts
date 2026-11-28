@@ -39,6 +39,16 @@ export const usersKeys = {
   },
 
   /**
+   * Key for descendant ids under one manager.
+   * Used to decide which rows a manager may edit or deactivate.
+   * @param managerId - Manager whose tree is being cached.
+   * @returns The key for that tree membership set.
+   */
+  managerTree(managerId: string) {
+    return [...usersKeys.all, 'manager-tree', managerId] as const
+  },
+
+  /**
    * Key for one user.
    * @param id - User id from the API.
    * @returns The key for that user.

@@ -1,11 +1,22 @@
+import PersonOffOutlinedIcon from '@mui/icons-material/PersonOffOutlined'
+import RestartAltIcon from '@mui/icons-material/RestartAlt'
 import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import { useSessionStore } from '@/features/auth/session-store'
 import {
+  ActivateUserDialog,
   CreateUserEntry,
+  DeactivateUserDialog,
+  DeleteUserDialog,
+  EditUserDialog,
+  canActivateUser,
+  canDeactivateUser,
+  canDeleteUser,
+  canEditUser,
   listUsersByRole,
+  loadManagerTreeMemberIds,
   useUsersQuery,
   usersKeys,
   type User,
@@ -37,6 +48,7 @@ function toNameMap(users: readonly User[] | undefined): Map<string, string> {
  * Signed-in users list with server filters, sort, and paging.
  * `SUPER` and `MANAGER` can create a user. Create stays outside DataView so the
  * temporary password can block dismiss until it has been read.
+ * Edit, deactivate, activate, and delete follow the API role rules.
  * @returns The `/users` screen.
  */
 export function UsersPage() {
@@ -57,6 +69,14 @@ export function UsersPage() {
   )
   // Row opened in the view dialog. Null means the dialog is closed.
   const [viewedUser, setViewedUser] = useState<User | null>(null)
+  // Row opened in the edit dialog.
+  const [editedUser, setEditedUser] = useState<User | null>(null)
+  // Row opened in the deactivate dialog.
+  const [deactivatedUser, setDeactivatedUser] = useState<User | null>(null)
+  // Row opened in the activate dialog.
+  const [activatedUser, setActivatedUser] = useState<User | null>(null)
+  // Row opened in the delete dialog.
+  const [deletedUser, setDeletedUser] = useState<User | null>(null)
 
   // List request built from the controlled view state.
   const listParams = toUsersListParams(
@@ -81,11 +101,20 @@ export function UsersPage() {
     queryFn: () => listUsersByRole('PDP').then((result) => result.data),
     staleTime: Infinity,
   })
+  // Descendant ids for a manager caller. Empty for every other role.
+  const managerTreeQuery = useQuery({
+    queryKey: usersKeys.managerTree(sessionUser?.id ?? ''),
+    queryFn: () => loadManagerTreeMemberIds(sessionUser?.id ?? ''),
+    enabled: sessionUser?.role === 'MANAGER' && Boolean(sessionUser.id),
+    staleTime: Infinity,
+  })
 
   // Manager id → name for cells and the view dialog.
   const managerNames = toNameMap(managersQuery.data)
   // PDP id → name for cells and the view dialog.
   const pdpNames = toNameMap(pdpsQuery.data)
+  // Tree membership used by manager write permissions. Empty until loaded.
+  const managerTreeIds = managerTreeQuery.data ?? new Set<string>()
   // Columns for this role, with related names filled in.
   const columns = usersColumns(viewerRole, managerNames, pdpNames)
   // Toolbar filters for this role.
@@ -142,6 +171,32 @@ export function UsersPage() {
               permission: true,
               onClick: (user) => setViewedUser(user),
             },
+            edit: {
+              permission: (user) =>
+                canEditUser(sessionUser, user, managerTreeIds),
+              onClick: (user) => setEditedUser(user),
+            },
+            delete: {
+              permission: () => canDeleteUser(sessionUser),
+              onClick: (user) => setDeletedUser(user),
+            },
+            custom: [
+              {
+                id: 'deactivate',
+                label: 'Mark inactive',
+                icon: <PersonOffOutlinedIcon fontSize="small" />,
+                permission: (user) =>
+                  canDeactivateUser(sessionUser, user, managerTreeIds),
+                onClick: (user) => setDeactivatedUser(user),
+              },
+              {
+                id: 'activate',
+                label: 'Mark active',
+                icon: <RestartAltIcon fontSize="small" />,
+                permission: (user) => canActivateUser(sessionUser, user),
+                onClick: (user) => setActivatedUser(user),
+              },
+            ],
           }}
           create={{
             canCreate: false,
@@ -156,6 +211,22 @@ export function UsersPage() {
         managerNames={managerNames}
         pdpNames={pdpNames}
         onClose={() => setViewedUser(null)}
+      />
+      <EditUserDialog
+        user={editedUser}
+        onClose={() => setEditedUser(null)}
+      />
+      <DeactivateUserDialog
+        user={deactivatedUser}
+        onClose={() => setDeactivatedUser(null)}
+      />
+      <ActivateUserDialog
+        user={activatedUser}
+        onClose={() => setActivatedUser(null)}
+      />
+      <DeleteUserDialog
+        user={deletedUser}
+        onClose={() => setDeletedUser(null)}
       />
     </div>
   )

@@ -1,9 +1,7 @@
 import { z } from 'zod'
 import { managerIsRequired } from '@/features/users/create-user/role-choices'
+import { userFormSharedSchema } from '@/features/users/user-form'
 import type { Role } from '@/shared/auth/types'
-
-// Every role the API accepts. The dropdown only offers the ones this caller may assign.
-const roleSchema = z.enum(['SUPER', 'MANAGER', 'PDP', 'USER'])
 
 /**
  * Checks the create form for the signed-in creator.
@@ -18,21 +16,8 @@ export function createUserSchema(callerRole: Role) {
         .string()
         .trim()
         .min(3, 'Username must be at least 3 characters'),
-      name: z.string().trim().min(1, 'Name is required'),
-      email: z
-        .string()
-        .trim()
-        .refine(
-          (value) =>
-            value.length === 0 || z.string().email().safeParse(value).success,
-          'Enter a valid email',
-        ),
-      phone: z.string(),
-      address: z.string(),
-      role: roleSchema,
-      managerId: z.string(),
-      pdpId: z.string(),
     })
+    .merge(userFormSharedSchema)
     .superRefine((values, ctx) => {
       // A manager cannot assign SUPER or MANAGER, even if the control is changed.
       if (
