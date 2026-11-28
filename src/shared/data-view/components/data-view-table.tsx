@@ -9,16 +9,24 @@ import type {
   ViewHeader,
 } from '@/shared/data-view/components/view-model'
 
+/**
+ * Builds one shared column track list for the header and every body row.
+ * Data columns use `max-content` so a wide value (email) gets a wider track
+ * than a short one (role), while every row still lines up on the same tracks.
+ * @param columnCount - Number of data columns in the view.
+ * @param showExpand - Whether the leading expand-control track is present.
+ * @param showActions - Whether the trailing actions track is present.
+ * @returns A CSS `grid-template-columns` value.
+ */
 function gridTemplate(
   columnCount: number,
   showExpand: boolean,
   showActions: boolean,
 ) {
-  // One grid for the header and every row, so column tracks are shared.
   // CSS lengths, not Tailwind: the column count is only known at runtime.
   return [
     showExpand ? '2.75rem' : null,
-    `repeat(${columnCount}, minmax(0, 1fr))`,
+    `repeat(${columnCount}, max-content)`,
     showActions ? 'max-content' : null,
   ]
     .filter((part): part is string => part !== null)
@@ -44,16 +52,19 @@ export function DataViewTable<T extends Record<string, unknown>>({
 }: DataViewBodyProps<T>) {
   const template = gridTemplate(columns.length, showExpand, showActions)
 
-  // min-w-0 + truncate keep long cell text (e.g. emails) inside the track
-  // so it cannot paint over the next column.
+  // nowrap keeps a cell on one line so its track width matches the content.
   const headerCell =
-    'min-w-0 border-b border-slate-200 bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700'
+    'whitespace-nowrap border-b border-slate-200 bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700'
   const bodyCell =
-    'min-w-0 truncate border-b border-slate-100 px-3 py-2 text-sm'
+    'whitespace-nowrap border-b border-slate-100 px-3 py-2 text-sm'
 
   return (
-    <div className="hidden overflow-hidden rounded-lg bg-white shadow-sm md:block">
-      <div className="grid" style={{ gridTemplateColumns: template }}>
+    <div className="hidden overflow-x-auto rounded-lg bg-white shadow-sm md:block">
+      {/* w-max min-w-full: grow with content, still fill the card when sparse. */}
+      <div
+        className="grid w-max min-w-full"
+        style={{ gridTemplateColumns: template }}
+      >
         {showExpand ? <div className={headerCell} /> : null}
         {headers.map((header) => {
           const column = columnFor(columns, header)
@@ -99,24 +110,19 @@ export function DataViewTable<T extends Record<string, unknown>>({
                 ) : null}
               </div>
             ) : null}
-            {columns.map((column, index) => {
-              // Rendered once so a string cell can also drive the native tooltip.
-              const content = column.cell(row.original)
-              return (
-                <div
-                  key={column.id}
-                  className={`${bodyCell} ${row.depth > 0 ? 'bg-slate-50' : ''}`}
-                  title={typeof content === 'string' ? content : undefined}
-                  style={
-                    index === 0 && row.depth > 0
-                      ? { paddingLeft: 12 + row.depth * 16 }
-                      : undefined
-                  }
-                >
-                  {content}
-                </div>
-              )
-            })}
+            {columns.map((column, index) => (
+              <div
+                key={column.id}
+                className={`${bodyCell} ${row.depth > 0 ? 'bg-slate-50' : ''}`}
+                style={
+                  index === 0 && row.depth > 0
+                    ? { paddingLeft: 12 + row.depth * 16 }
+                    : undefined
+                }
+              >
+                {column.cell(row.original)}
+              </div>
+            ))}
             {showActions ? (
               <div
                 className={`border-b border-slate-100 px-2 py-1 ${row.depth > 0 ? 'bg-slate-50' : ''}`}
