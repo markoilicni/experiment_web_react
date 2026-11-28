@@ -44,8 +44,12 @@ export function DataViewTable<T extends Record<string, unknown>>({
 }: DataViewBodyProps<T>) {
   const template = gridTemplate(columns.length, showExpand, showActions)
 
+  // min-w-0 + truncate keep long cell text (e.g. emails) inside the track
+  // so it cannot paint over the next column.
   const headerCell =
-    'border-b border-slate-200 bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700'
+    'min-w-0 border-b border-slate-200 bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700'
+  const bodyCell =
+    'min-w-0 truncate border-b border-slate-100 px-3 py-2 text-sm'
 
   return (
     <div className="hidden overflow-hidden rounded-lg bg-white shadow-sm md:block">
@@ -95,19 +99,24 @@ export function DataViewTable<T extends Record<string, unknown>>({
                 ) : null}
               </div>
             ) : null}
-            {columns.map((column, index) => (
-              <div
-                key={column.id}
-                className={`border-b border-slate-100 px-3 py-2 text-sm ${row.depth > 0 ? 'bg-slate-50' : ''}`}
-                style={
-                  index === 0 && row.depth > 0
-                    ? { paddingLeft: 12 + row.depth * 16 }
-                    : undefined
-                }
-              >
-                {column.cell(row.original)}
-              </div>
-            ))}
+            {columns.map((column, index) => {
+              // Rendered once so a string cell can also drive the native tooltip.
+              const content = column.cell(row.original)
+              return (
+                <div
+                  key={column.id}
+                  className={`${bodyCell} ${row.depth > 0 ? 'bg-slate-50' : ''}`}
+                  title={typeof content === 'string' ? content : undefined}
+                  style={
+                    index === 0 && row.depth > 0
+                      ? { paddingLeft: 12 + row.depth * 16 }
+                      : undefined
+                  }
+                >
+                  {content}
+                </div>
+              )
+            })}
             {showActions ? (
               <div
                 className={`border-b border-slate-100 px-2 py-1 ${row.depth > 0 ? 'bg-slate-50' : ''}`}
